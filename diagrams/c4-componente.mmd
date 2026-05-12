@@ -1,0 +1,35 @@
+flowchart TB
+    classDef component fill:#85BBF0,stroke:#5D82A8,color:#000,stroke-width:1px
+    classDef external fill:#999999,stroke:#6B6B6B,color:#fff,stroke-width:1px
+    classDef boundary fill:transparent,stroke:#666,stroke-dasharray:5 5,color:#888
+
+    api_gw["<b>API Gateway</b>"]:::external
+    driver_app["<b>App do Entregador</b>"]:::external
+
+    subgraph backend["Backend"]
+        direction TB
+        parser["<b>Parser</b><br/><i>Adapter por marketplace</i>"]:::component
+        return_mgr["<b>Return Manager</b><br/><i>Máquina de estados</i>"]:::component
+        scheduling["<b>Scheduling</b><br/><i>Agenda + roteamento</i>"]:::component
+        evidence["<b>Evidence</b><br/><i>Hash + WORM</i>"]:::component
+        hub["<b>Hub Management</b><br/><i>Triagem + despacho</i>"]:::component
+        notification["<b>Notifications</b><br/><i>SMS · push · webhook</i>"]:::component
+    end
+
+    db[("<b>PostgreSQL</b><br/>Estado")]:::external
+    s3[("<b>S3 WORM</b><br/>Evidências")]:::external
+    cache[("<b>Redis</b><br/>Disponibilidade")]:::external
+
+    api_gw -- "Payload bruto" --> parser
+    parser -- "ReturnRequest" --> return_mgr
+    return_mgr -- "Agendar" --> scheduling
+    scheduling -- "Lookup" --> cache
+    scheduling -- "Ordem" --> driver_app
+    driver_app -- "Foto + geotag" --> evidence
+    evidence -- "Imutável" --> s3
+    evidence -- "Avança estado" --> return_mgr
+    return_mgr -- "Chegou ao hub" --> hub
+    return_mgr -- "Notificar" --> notification
+    return_mgr -- "SQL" --> db
+
+    class backend boundary

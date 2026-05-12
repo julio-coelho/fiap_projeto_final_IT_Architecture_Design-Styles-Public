@@ -1,0 +1,34 @@
+flowchart TB
+    classDef person fill:#08427B,stroke:#052E56,color:#fff,stroke-width:1px
+    classDef container fill:#1168BD,stroke:#0B4884,color:#fff,stroke-width:1px
+    classDef external fill:#999999,stroke:#6B6B6B,color:#fff,stroke-width:1px
+    classDef boundary fill:transparent,stroke:#666,stroke-dasharray:5 5,color:#888
+
+    marketplace(["<b>Marketplace</b><br/>Cliente B2B"]):::person
+    driver(["<b>Entregador</b><br/>App mobile"]):::person
+    hub_op(["<b>Operador de Hub</b><br/>Web"]):::person
+
+    subgraph devolveja["DevolveJá"]
+        direction TB
+        api_gw["<b>API Gateway</b><br/><i>AWS API GW</i><br/>OAuth 2.0 + Rate Limit"]:::container
+        backend["<b>Backend</b><br/><i>Monolito Modular</i><br/>Parser · Return Mgr · Scheduling<br/>Evidence · Hub · Notifications"]:::container
+        driver_app["<b>App do Entregador</b><br/><i>PWA</i><br/>Offline-first"]:::container
+        db[("<b>PostgreSQL</b><br/><i>RDS Multi-AZ</i><br/>Estado")]:::container
+        s3[("<b>S3 WORM</b><br/><i>Object Lock</i><br/>Evidências")]:::container
+        cache[("<b>Redis</b><br/><i>ElastiCache</i><br/>Disponibilidade")]:::container
+    end
+
+    notif["<b>Notificações</b><br/>Twilio + Firebase"]:::external
+
+    marketplace -- "REST" --> api_gw
+    driver -. "usa" .-> driver_app
+    hub_op -- "Web" --> backend
+    driver_app -- "REST (evidência)" --> api_gw
+    api_gw -- "HTTP interno" --> backend
+    backend -- "Push (ordem)" --> driver_app
+    backend -- "API" --> notif
+    backend -- "SQL" --> db
+    backend -- "AWS SDK" --> s3
+    backend -- "Redis" --> cache
+
+    class devolveja boundary

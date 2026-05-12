@@ -1,0 +1,23 @@
+flowchart LR
+    classDef person fill:#08427B,stroke:#052E56,color:#fff,stroke-width:1px
+    classDef system fill:#1168BD,stroke:#0B4884,color:#fff,stroke-width:1px
+    classDef external fill:#999999,stroke:#6B6B6B,color:#fff,stroke-width:1px
+
+    marketplace(["<b>Marketplace</b><br/><i>Cliente B2B</i>"]):::person
+
+    devolveja["<b>DevolveJá</b><br/><i>Plataforma B2B</i><br/>Orquestra coleta,<br/>evidência, triagem<br/>e devolução"]:::system
+
+    consumer(["<b>Consumidor</b><br/><i>Solicita coleta</i>"]):::person
+    driver(["<b>Entregador</b><br/><i>Realiza coleta</i>"]):::person
+    seller(["<b>Lojista</b><br/><i>Recebe devolução</i>"]):::person
+
+    notif["<b>Notificações</b><br/><i>SMS / Push</i>"]:::external
+    carrier["<b>Transportadora</b><br/><i>Hub → Lojista</i>"]:::external
+
+    marketplace -- "Solicita coleta /<br/>recebe status<br/>(REST + Webhook)" --> devolveja
+    devolveja -- "Avisa coleta" --> consumer
+    devolveja -- "Ordem de coleta" --> driver
+    driver -- "Envia evidência" --> devolveja
+    devolveja -- "Item devolvido" --> seller
+    devolveja -- "Aciona" --> notif
+    devolveja -- "Última milha" --> carrier
