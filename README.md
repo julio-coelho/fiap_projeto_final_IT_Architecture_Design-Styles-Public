@@ -4,6 +4,11 @@ Plataforma B2B que orquestra a **coleta de devoluções no endereço do consumid
 
 ---
 
+### Gravação
+https://drive.google.com/drive/folders/1kQ8ZI4yLvyp3VSE6d8Fdr4lPKbVZJPqt
+
+---
+
 ## Equipe
 
 | Nome | RM 
